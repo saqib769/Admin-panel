@@ -1,0 +1,10 @@
+version: '3.8'
+
+services:
+  app:
+    build: .
+    image: react-image
+    container_name: my-react-app
+    ports:
+      - "3000:3000"
+

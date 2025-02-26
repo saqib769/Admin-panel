@@ -8,15 +8,15 @@ pipeline {
             }
         }
 
-        stage('Build Docker Image') {
+        stage('Build and Start Containers') {
             steps {
-                sh 'docker build -t my-app .'
+                sh 'docker compose up --build -d'
             }
         }
 
-        stage('Run Docker Container') {
+        stage('Verify Running Containers') {
             steps {
-                sh 'docker run -d -p 3000:3000 my-app'
+                sh 'docker ps'
             }
         }
     }
