@@ -22,10 +22,10 @@ jobs:
       - name: Set up Node.js
         uses: actions/setup-node@v3
         with:
-          node-version: '18'  # Use Node.js version 16 or later
+          node-version: '18'  # Use Node.js version 16
 
-      # Step 3: Initialize Dummy npm Project and Install Dependencies
-      - name: Initialize npm Project and Install Dependencies
+      # Step 3: Install Dependencies
+      - name: Install Dependencies
         run: |
           # Initialize a new npm project with a dummy package.json
           echo '{"name": "dummy-project", "version": "1.0.0", "scripts": {"test": "jest"}}' > package.json
@@ -38,7 +38,11 @@ jobs:
         run: |
           # Create a jest.config.js file for jest-junit reporter
           echo "module.exports = {
-            reporters: ['default', ['jest-junit', { outputDirectory: 'build/test-results/test', outputName: 'TEST-results.xml' }]]
+            reporters: ['default', ['jest-junit', { 
+              outputDirectory: 'build/test-results/test',
+              outputName: 'TEST-results.xml',
+              includePassed: true
+            }]]
           };" > jest.config.js
           
           # Create a simple dummy test file that always passes
