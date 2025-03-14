@@ -24,11 +24,6 @@ jobs:
         with:
           node-version: '18'  # Use Node.js version 16
 
-      # Step 3: Install Dependencies
-      - name: Install Dependencies
-        run: |
-          # Install Jest and jest-junit for test reporting
-          npm install 
 
       # Step 2: Run Simple Test and Generate JUnit Report
       - name: Run Simple Test and Generate JUnit Report
@@ -46,6 +41,10 @@ jobs:
             echo "Test failed!"
             TEST_RESULT=1
           fi
+
+          # Ensure the directory exists before writing the JUnit XML report
+          mkdir -p build/test-results/test  # Create the necessary directories
+          
 
           # Generate a JUnit XML report manually
           echo '<?xml version="1.0" encoding="UTF-8"?>' > build/test-results/test/TEST-results.xml
