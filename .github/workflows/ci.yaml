@@ -3,7 +3,7 @@ name: Build and Run Tests
 on:
   push:
     branches:
-      - main  # Trigger the pipeline on pull request to the 'main' branch
+      - main  # Trigger the pipeline on push to the 'main' branch
 
 jobs:
   build:
@@ -22,26 +22,31 @@ jobs:
       - name: Set up Node.js
         uses: actions/setup-node@v3
         with:
-          node-version: '18'
+          node-version: '18'  # Use Node.js version 18 or higher
 
       # Step 3: Install Dependencies
       - name: Install Dependencies
-        run: npm install  # Install dependencies from package.json
+        run: |
+          npm install
+          npm install --save-dev @babel/plugin-proposal-private-property-in-object  # Install the missing Babel plugin
 
       # Step 4: Set up Jest and Create a Dummy Test
       - name: Set up Jest and Create a Dummy Test
         run: |
+          # Create jest.config.js file for jest-junit reporter
           echo "module.exports = { reporters: ['default', ['jest-junit', { outputDirectory: 'build/test-results/test', outputName: 'TEST-results.xml' }]] };" > jest.config.js
+          
+          # Create a dummy test file
           mkdir -p tests
           echo "test('dummy test', () => { expect(true).toBe(true); });" > tests/dummy.test.js
 
       # Step 5: Run the Tests
       - name: Run Tests
-        run: npm test -- --verbose  # Run Jest with verbose output to help debug failures
+        run: npm test -- --verbose --detectOpenHandles  # Run Jest with verbose output and detect open handles
 
       # Step 6: Publish Test Report
       - name: Publish Test Report
         uses: mikepenz/action-junit-report@v5
         if: success() || failure()  # Ensure this step runs even if tests fail
         with:
-          report_paths: '**/build/test-results/test/TEST-*.xml'  # Path to the generated JUnit XML report
+          report_paths: 'build/test-results/test/TEST-results.xml'  # Path to the generated JUnit XML report
