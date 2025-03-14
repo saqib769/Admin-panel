@@ -27,33 +27,41 @@ jobs:
       # Step 3: Install Dependencies
       - name: Install Dependencies
         run: |
-          # Initialize a new npm project with a dummy package.json
-          echo '{"name": "dummy-project", "version": "1.0.0", "scripts": {"test": "jest"}}' > package.json
-          
           # Install Jest and jest-junit for test reporting
-          npm install jest jest-junit
+          npm install 
 
-      # Step 4: Set up Jest and Create a Dummy Test
-      - name: Set up Jest and Create a Dummy Test
+      # Step 2: Run Simple Test and Generate JUnit Report
+      - name: Run Simple Test and Generate JUnit Report
         run: |
-          # Create a jest.config.js file for jest-junit reporter
-          echo "module.exports = {
-            reporters: ['default', ['jest-junit', { 
-              outputDirectory: 'build/test-results/test',
-              outputName: 'TEST-results.xml',
-              includePassed: true
-            }]]
-          };" > jest.config.js
+          # Create a simple test script (shell script)
+          echo "Running sample test..."
           
-          # Create a simple dummy test file that always passes
-          mkdir -p tests
-          echo "test('dummy test', () => { expect(true).toBe(true); });" > tests/dummy.test.js
+          # Create a dummy test (pass or fail)
+          TEST_RESULT=0  # 0 means pass, 1 means fail
+          
+          # A simple test: change the TEST_RESULT to 1 to simulate a failure
+          if [ $((RANDOM % 2)) -eq 0 ]; then
+            echo "Test passed!"
+          else
+            echo "Test failed!"
+            TEST_RESULT=1
+          fi
 
-      # Step 5: Run the Tests
-      - name: Run Tests
-        run: npm test -- --verbose --detectOpenHandles  # Run Jest with verbose output and detect open handles
+          # Generate a JUnit XML report manually
+          echo '<?xml version="1.0" encoding="UTF-8"?>' > build/test-results/test/TEST-results.xml
+          echo '<testsuites>' >> build/test-results/test/TEST-results.xml
+          echo '  <testsuite name="Sample Test Suite" tests="1" failures="'"$TEST_RESULT"'" errors="0">' >> build/test-results/test/TEST-results.xml
+          if [ $TEST_RESULT -eq 0 ]; then
+            echo '    <testcase name="Sample Test" time="0.001"/>' >> build/test-results/test/TEST-results.xml
+          else
+            echo '    <testcase name="Sample Test" time="0.001">' >> build/test-results/test/TEST-results.xml
+            echo '      <failure message="Test failed">Test failed</failure>' >> build/test-results/test/TEST-results.xml
+            echo '    </testcase>' >> build/test-results/test/TEST-results.xml
+          fi
+          echo '  </testsuite>' >> build/test-results/test/TEST-results.xml
+          echo '</testsuites>' >> build/test-results/test/TEST-results.xml
 
-      # Step 6: Publish Test Report
+      # Step 3: Publish Test Report
       - name: Publish Test Report
         uses: mikepenz/action-junit-report@v5  # Publish the JUnit test results
         if: success() || failure()  # Ensure this step runs even if tests fail
