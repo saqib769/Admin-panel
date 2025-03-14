@@ -1,0 +1,57 @@
+name: Build and Run Tests
+
+on:
+  pull_request:
+    branches:
+      - main  # Trigger the workflow on pull requests to the main branch
+
+jobs:
+  build:
+    name: Build and Run Tests
+    runs-on: ubuntu-latest  # Use the latest Ubuntu runner
+
+    steps:
+      # Step 1: Checkout Code (even though we have no code, this step is necessary for GitHub Actions to run)
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      # Step 2: Set up Node.js (Install the necessary Node.js environment)
+      - name: Set up Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '14'  # Use Node.js 14 (you can change this version if needed)
+
+      # Step 3: Initialize a dummy npm project and install dependencies
+      - name: Initialize npm Project and Install Dependencies
+        run: |
+          # Create a package.json file (simulating a Node.js project)
+          echo '{"name": "dummy-project", "version": "1.0.0", "scripts": {"test": "jest"}}' > package.json
+          
+          # Install Jest and jest-junit (for JUnit-style test results)
+          npm install jest jest-junit
+
+      # Step 4: Set up Jest and Create a Dummy Test
+      - name: Set up Jest and Create a Dummy Test
+        run: |
+          # Create a basic Jest config file that uses jest-junit
+          echo "module.exports = {
+            reporters: [
+              'default',
+              ['jest-junit', { outputDirectory: 'build/test-results/test', outputName: 'TEST-results.xml' }]
+            ]
+          };" > jest.config.js
+          
+          # Create a simple dummy test file
+          mkdir -p tests
+          echo "test('dummy test', () => { expect(true).toBe(true); });" > tests/dummy.test.js
+
+      # Step 5: Run the Tests
+      - name: Run Tests
+        run: npm test  # This will run the Jest tests and generate the JUnit XML report
+
+      # Step 6: Publish Test Report
+      - name: Publish Test Report
+        uses: mikepenz/action-junit-report@v5  # Action to publish JUnit test results
+        if: success() || failure()  # Ensure this step runs even if tests fail
+        with:
+          report_paths: '**/build/test-results/test/TEST-*.xml'  # Path to the generated JUnit XML report
