@@ -1,7 +1,7 @@
 name: Build and Run Tests
 
 on:
-  pull_request:
+  push:
     branches:
       - main  # This will trigger the pipeline on pull requests to the 'main' branch
 
