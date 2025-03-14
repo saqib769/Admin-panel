@@ -18,45 +18,41 @@ jobs:
       - name: Checkout Code
         uses: actions/checkout@v4
 
-      # Step 2: Set up Node.js
-      - name: Set up Node.js
-        uses: actions/setup-node@v3
-        with:
-          node-version: '18'  # Use Node.js version 16
-
-
       # Step 2: Run Simple Test and Generate JUnit Report
       - name: Run Simple Test and Generate JUnit Report
         run: |
           # Create a simple test script (shell script)
           echo "Running sample test..."
+
+          # Initialize TEST_RESULT to 0 (pass)
+          TEST_RESULT=0
           
-          # Create a dummy test (pass or fail)
-          TEST_RESULT=0  # 0 means pass, 1 means fail
-          
-          # A simple test: change the TEST_RESULT to 1 to simulate a failure
+          # Randomly choose pass or fail
           if [ $((RANDOM % 2)) -eq 0 ]; then
             echo "Test passed!"
           else
             echo "Test failed!"
-            TEST_RESULT=1
+            TEST_RESULT=1  # Set TEST_RESULT to 1 (fail) if it fails
           fi
 
           # Ensure the directory exists before writing the JUnit XML report
           mkdir -p build/test-results/test  # Create the necessary directories
-          
 
           # Generate a JUnit XML report manually
           echo '<?xml version="1.0" encoding="UTF-8"?>' > build/test-results/test/TEST-results.xml
           echo '<testsuites>' >> build/test-results/test/TEST-results.xml
           echo '  <testsuite name="Sample Test Suite" tests="1" failures="'"$TEST_RESULT"'" errors="0">' >> build/test-results/test/TEST-results.xml
+          
+          # If the test passes
           if [ $TEST_RESULT -eq 0 ]; then
             echo '    <testcase name="Sample Test" time="0.001"/>' >> build/test-results/test/TEST-results.xml
           else
+            # If the test fails
             echo '    <testcase name="Sample Test" time="0.001">' >> build/test-results/test/TEST-results.xml
             echo '      <failure message="Test failed">Test failed</failure>' >> build/test-results/test/TEST-results.xml
             echo '    </testcase>' >> build/test-results/test/TEST-results.xml
           fi
+
           echo '  </testsuite>' >> build/test-results/test/TEST-results.xml
           echo '</testsuites>' >> build/test-results/test/TEST-results.xml
 
