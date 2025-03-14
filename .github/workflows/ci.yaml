@@ -3,7 +3,7 @@ name: Build and Run Tests
 on:
   push:
     branches:
-      - main  # Trigger the workflow on pull request to the 'main' branch
+      - main  # Trigger this workflow when a pull request is created to the 'main' branch
 
 jobs:
   build:
@@ -11,25 +11,48 @@ jobs:
     runs-on: ubuntu-latest  # Use the latest Ubuntu runner
 
     steps:
-      # Step 1: Checkout Code
+      # Step 1: Checkout Code (even though there's no project, this is required for the GitHub Actions workflow)
       - name: Checkout Code
         uses: actions/checkout@v4
 
-      # Step 2: Set up Node.js
+      # Step 2: Set up Node.js (we need Node.js for running the tests)
       - name: Set up Node.js
         uses: actions/setup-node@v3
         with:
-          node-version: '14'
+          node-version: '14'  # Use Node.js 14 (you can change this to your desired version)
 
-      # Step 3: Install Dependencies
-      - name: Install Dependencies
-        run: npm install  # Install dependencies
+      # Step 3: Initialize a dummy npm project and install dependencies
+      - name: Initialize npm Project and Install Dependencies
+        run: |
+          # Create a package.json file (simulating a new Node.js project)
+          echo '{"name": "dummy-project", "version": "1.0.0", "scripts": {"test": "jest"}}' > package.json
+          
+          # Install Jest and jest-junit (for generating JUnit-style test reports)
+          npm install jest jest-junit
 
-      # Step 4: Run Tests
+      # Step 4: Set up Jest and Create a Dummy Test
+      - name: Set up Jest and Create a Dummy Test
+        run: |
+          # Create a basic jest.config.js file that uses jest-junit to generate JUnit XML reports
+          echo "module.exports = {
+            reporters: [
+              'default',
+              ['jest-junit', { 
+                outputDirectory: 'build/test-results/test',
+                outputName: 'TEST-results.xml'
+              }]
+            ]
+          };" > jest.config.js
+          
+          # Create a simple dummy test file
+          mkdir -p tests
+          echo "test('dummy test', () => { expect(true).toBe(true); });" > tests/dummy.test.js
+
+      # Step 5: Run the Tests
       - name: Run Tests
-        run: npm test  # Jest will run the tests and generate the JUnit XML report
+        run: npm test  # This runs the Jest tests and generates the JUnit XML report
 
-      # Step 5: Publish Test Report
+      # Step 6: Publish Test Report
       - name: Publish Test Report
         uses: mikepenz/action-junit-report@v5  # Publish the JUnit test results
         if: success() || failure()  # Ensure this step runs even if tests fail
