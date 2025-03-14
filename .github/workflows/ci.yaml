@@ -3,7 +3,7 @@ name: Build and Run Tests
 on:
   push:
     branches:
-      - main  # Trigger on pull request to the 'main' branch
+      - main  # Trigger the workflow on pull request to the 'main' branch
 
 jobs:
   build:
@@ -22,16 +22,26 @@ jobs:
       - name: Set up Node.js
         uses: actions/setup-node@v3
         with:
-          node-version: '16'  # Use Node.js version 16
+          node-version: '18'  # Use Node.js version 16 or later
 
-      # Step 3: Install Dependencies
-      - name: Install Dependencies
-        run: npm install  # Install dependencies from package.json
+      # Step 3: Initialize Dummy npm Project and Install Dependencies
+      - name: Initialize npm Project and Install Dependencies
+        run: |
+          # Initialize a new npm project with a dummy package.json
+          echo '{"name": "dummy-project", "version": "1.0.0", "scripts": {"test": "jest"}}' > package.json
+          
+          # Install Jest and jest-junit for test reporting
+          npm install jest jest-junit
 
       # Step 4: Set up Jest and Create a Dummy Test
       - name: Set up Jest and Create a Dummy Test
         run: |
-          echo "module.exports = { reporters: ['default', ['jest-junit', { outputDirectory: 'build/test-results/test', outputName: 'TEST-results.xml' }]] };" > jest.config.js
+          # Create a jest.config.js file for jest-junit reporter
+          echo "module.exports = {
+            reporters: ['default', ['jest-junit', { outputDirectory: 'build/test-results/test', outputName: 'TEST-results.xml' }]]
+          };" > jest.config.js
+          
+          # Create a simple dummy test file that always passes
           mkdir -p tests
           echo "test('dummy test', () => { expect(true).toBe(true); });" > tests/dummy.test.js
 
@@ -41,7 +51,7 @@ jobs:
 
       # Step 6: Publish Test Report
       - name: Publish Test Report
-        uses: mikepenz/action-junit-report@v5
+        uses: mikepenz/action-junit-report@v5  # Publish the JUnit test results
         if: success() || failure()  # Ensure this step runs even if tests fail
         with:
           report_paths: '**/build/test-results/test/TEST-*.xml'  # Path to the generated JUnit XML report
