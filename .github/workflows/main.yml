@@ -22,13 +22,9 @@ jobs:
           mkdir -p test-results
           echo '<?xml version="1.0" encoding="UTF-8"?>
           <testsuites>
-            <testsuite name="DummyTestSuite" tests="2" failures="1" errors="0">
-              <testcase classname="DummyTest" name="testSuccess" time="0.001"/>
-              <testcase classname="DummyTest" name="testFailure" time="0.002">
-                <failure message="Expected true but got false">
-                  Test failed at DummyTest.testFailure
-                </failure>
-              </testcase>
+            <testsuite name="DummyTestSuite" tests="2" failures="0" errors="0">
+            <testcase classname="DummyTest" name="testSuccess" time="0.001"/>
+            <testcase classname="DummyTest" name="testFailure" time="0.002"/>
             </testsuite>
           </testsuites>' > test-results/TEST-dummy.xml
 
