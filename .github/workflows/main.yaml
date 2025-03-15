@@ -6,11 +6,12 @@ on:
       - main 
 
 permissions:
-   checks: write
+  checks: write
+  contents: read  # Code read karne ki permission
+  actions: read   # Actions run karne ki permission
 
 jobs:
   build:
-    name: Build and Run Tests
     runs-on: ubuntu-latest
     steps:
       - name: Checkout Code
@@ -18,17 +19,19 @@ jobs:
       
       - name: Create Dummy Test Results
         run: |
-          mkdir -p build/test-results/test
-          echo '<?xml version="1.0" encoding="UTF-8"?>' > build/test-results/test/TEST-dummy.xml
-          echo '<testsuite name="DummyTestSuite" tests="2" failures="1" errors="0" skipped="0">' >> build/test-results/test/TEST-dummy.xml
-          echo '  <testcase classname="DummyTest" name="testSuccess" time="0.001"/>' >> build/test-results/test/TEST-dummy.xml
-          echo '  <testcase classname="DummyTest" name="testFailure" time="0.002">' >> build/test-results/test/TEST-dummy.xml
-          echo '    <failure message="Assertion failed">Expected true but got false</failure>' >> build/test-results/test/TEST-dummy.xml
-          echo '  </testcase>' >> build/test-results/test/TEST-dummy.xml
-          echo '</testsuite>' >> build/test-results/test/TEST-dummy.xml
-
+          mkdir -p test-results
+          cat <<EOT > test-results/TEST-dummy.xml
+          <?xml version="1.0" encoding="UTF-8"?>
+          <testsuite name="DummyTestSuite" tests="2" failures="1">
+            <testcase classname="DummyTest" name="testSuccess" time="0.001"/>
+            <testcase classname="DummyTest" name="testFailure" time="0.002">
+              <failure message="Test failed">Expected true but got false</failure>
+            </testcase>
+          </testsuite>
+          EOT
+      
       - name: Publish Test Report
         uses: mikepenz/action-junit-report@v5
         if: success() || failure()
         with:
-          report_paths: '**/build/test-results/test/TEST-*.xml'
+          report_paths: 'test-results/TEST-dummy.xml'
