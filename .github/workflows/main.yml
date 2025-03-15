@@ -3,14 +3,14 @@ name: Build and Run Tests
 on:
   push:
     branches:
-      - main
+      - main 
 
 permissions:
-  checks: write
-  contents: read
+   checks: write
 
 jobs:
   build:
+    name: Build and Run Tests
     runs-on: ubuntu-latest
     steps:
       - name: Checkout Code
@@ -28,6 +28,9 @@ jobs:
             </testcase>
           </testsuite>
           EOT
+      
+      - name: Verify Test Results
+        run: ls -R test-results && cat test-results/TEST-dummy.xml
       
       - name: Publish Test Report
         uses: mikepenz/action-junit-report@v5
