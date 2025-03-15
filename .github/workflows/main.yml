@@ -3,11 +3,11 @@ name: Build and Run Tests
 on:
   push:
     branches:
-      - main 
+      - main
 
 permissions:
   checks: write
-  contents: read  
+  contents: read
 
 jobs:
   build:
@@ -20,19 +20,17 @@ jobs:
       - name: Create Dummy Test Results
         run: |
           mkdir -p test-results
-          cat > test-results/TEST-dummy.xml <<EOT
-<?xml version="1.0" encoding="UTF-8"?>
-<testsuites>
-  <testsuite name="DummyTestSuite" tests="2" failures="1" errors="0">
-    <testcase classname="DummyTest" name="testSuccess" time="0.001"/>
-    <testcase classname="DummyTest" name="testFailure" time="0.002">
-      <failure message="Expected true but got false">
-        Test failed at DummyTest.testFailure
-      </failure>
-    </testcase>
-  </testsuite>
-</testsuites>
-EOT
+          echo '<?xml version="1.0" encoding="UTF-8"?>
+          <testsuites>
+            <testsuite name="DummyTestSuite" tests="2" failures="1" errors="0">
+              <testcase classname="DummyTest" name="testSuccess" time="0.001"/>
+              <testcase classname="DummyTest" name="testFailure" time="0.002">
+                <failure message="Expected true but got false">
+                  Test failed at DummyTest.testFailure
+                </failure>
+              </testcase>
+            </testsuite>
+          </testsuites>' > test-results/TEST-dummy.xml
 
       - name: Verify Test Results
         run: |
@@ -43,4 +41,4 @@ EOT
         uses: mikepenz/action-junit-report@v5
         if: always()
         with:
-          report_paths: 'test-results/TEST-dummy.xml'
+          report_paths: "test-results/TEST-dummy.xml"
