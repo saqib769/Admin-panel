@@ -6,8 +6,8 @@ on:
       - main 
 
 permissions:
-   checks: write
-   contents: read
+  checks: write
+  contents: read  
 
 jobs:
   build:
@@ -21,20 +21,24 @@ jobs:
         run: |
           mkdir -p test-results
           cat <<EOT > test-results/TEST-dummy.xml
-          <?xml version="1.0" encoding="UTF-8"?>
-          <testsuite name="DummyTestSuite" tests="2" failures="1">
-            <testcase classname="DummyTest" name="testSuccess" time="0.001"/>
-            <testcase classname="DummyTest" name="testFailure" time="0.002">
-              <failure message="Test failed">Expected true but got false</failure>
-            </testcase>
-          </testsuite>
-          EOT
-      
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuites>
+    <testsuite name="DummyTestSuite" tests="2" failures="1" errors="0">
+        <testcase classname="DummyTest" name="testSuccess" time="0.001"/>
+        <testcase classname="DummyTest" name="testFailure" time="0.002">
+            <failure message="Expected true but got false">
+                Test failed at DummyTest.testFailure
+            </failure>
+        </testcase>
+    </testsuite>
+</testsuites>
+EOT
+
       - name: Verify Test Results
         run: ls -R test-results && cat test-results/TEST-dummy.xml
       
       - name: Publish Test Report
         uses: mikepenz/action-junit-report@v5
-        if: success() || failure()
+        if: always()
         with:
           report_paths: 'test-results/TEST-dummy.xml'
