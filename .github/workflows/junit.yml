@@ -5,6 +5,7 @@ on:
       - main
 
 permissions:
+  checks: write
   contents: read
   actions: read
 
