@@ -33,7 +33,7 @@ jobs:
           node -e "require('html-pdf').create(require('fs').readFileSync('report/index.html', 'utf8')).toFile('report/report.pdf', err => { if(err) throw err; });"
 
       - name: Upload PDF
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@main
         with:
           name: test-report
           path: report/report.pdf
