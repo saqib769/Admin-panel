@@ -1,0 +1,41 @@
+name: Simple Node Test with PDF Report
+
+on: push
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v3
+
+      - name: Setup Node
+        uses: actions/setup-node@v3
+        with:
+          node-version: '18'
+
+      - name: Install Dependencies
+        run: |
+          npm install mocha mochawesome html-pdf-cli --save-dev
+
+      - name: Create Test File
+        run: |
+          mkdir -p test
+          echo "const assert = require('assert');
+          describe('PDF Test', () => {
+            it('should pass', () => {
+              assert.strictEqual(1 + 1, 2);
+            });
+          });" > test/test.js
+
+      - name: Run Test and Generate PDF
+        run: |
+          npx mocha test --reporter mochawesome --reporter-options reportDir=report,reportFilename=index
+          npx html-pdf-cli report/index.html report/report.pdf
+
+      - name: Upload PDF Report
+        uses: actions/upload-artifact@v3
+        with:
+          name: test-report
+          path: report/report.pdf
