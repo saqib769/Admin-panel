@@ -1,7 +1,6 @@
-name: Simple PDF Report
+name: PDF Report
 
-on:
-  push:
+on: push
 
 jobs:
   test:
@@ -13,33 +12,13 @@ jobs:
         with:
           node-version: '18'
 
-      - name: Install dependencies
-        run: |
-          npm install mocha mochawesome puppeteer --save-dev
+      - run: npm install mocha mochawesome puppeteer --save-dev
 
-      - name: Create test
-        run: |
-          mkdir -p test
-          echo "const assert = require('assert');
-          describe('Test', () => {
-            it('should pass', () => {
-              assert.strictEqual(2 + 2, 4);
-            });
-          });" > test/test.js
+      - run: |
+          npx mocha --reporter mochawesome --reporter-options reportDir=report,reportFilename=index
+          node -e "const fs=require('fs');const p=require('puppeteer');(async()=>{const b=await p.launch({args:['--no-sandbox']});const pg=await b.newPage();const html=fs.readFileSync('report/index.html','utf8');await pg.setContent(html);await pg.pdf({path:'report/report.pdf'});await b.close();})();"
 
-      - name: Run test and generate PDF
-        run: |
-          npx mocha test --reporter mochawesome --reporter-options reportDir=report,reportFilename=index
-          node -e "const fs = require('fs'); const puppeteer = require('puppeteer'); (async () => {
-            const browser = await puppeteer.launch({ headless: 'new', args: ['--no-sandbox'] });
-            const page = await browser.newPage();
-            await page.setContent(fs.readFileSync('report/index.html', 'utf8'));
-            await page.pdf({ path: 'report/report.pdf', format: 'A4' });
-            await browser.close();
-          })();"
-
-      - name: Upload PDF
-        uses: actions/upload-artifact@main
+      - uses: actions/upload-artifact@main
         with:
           name: test-report
           path: report/report.pdf
