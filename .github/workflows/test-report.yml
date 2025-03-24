@@ -1,7 +1,7 @@
 name: PDF Test Report
 
 on:
-  workflow_dispatch:  # Sirf manually chalega
+  push:
 
 jobs:
   test:
