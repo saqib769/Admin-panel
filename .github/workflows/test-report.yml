@@ -14,6 +14,16 @@ jobs:
 
       - run: npm install mocha mochawesome puppeteer --save-dev
 
+      - name: Create Simple Test
+        run: |
+          mkdir -p test
+          echo "const assert = require('assert');
+          describe('Check', () => {
+            it('works', () => {
+              assert.strictEqual(2 + 2, 4);
+            });
+          });" > test/sample.test.js
+
       - run: |
           npx mocha --reporter mochawesome --reporter-options reportDir=report,reportFilename=index
           node -e "const fs=require('fs');const p=require('puppeteer');(async()=>{const b=await p.launch({args:['--no-sandbox']});const pg=await b.newPage();const html=fs.readFileSync('report/index.html','utf8');await pg.setContent(html);await pg.pdf({path:'report/report.pdf'});await b.close();})();"
