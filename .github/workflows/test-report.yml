@@ -13,9 +13,9 @@ jobs:
         with:
           node-version: '18'
 
-      - name: Install deps
+      - name: Install dependencies
         run: |
-          npm install mocha mochawesome html-pdf --save-dev
+          npm install mocha mochawesome puppeteer --save-dev
 
       - name: Create test
         run: |
@@ -27,10 +27,16 @@ jobs:
             });
           });" > test/test.js
 
-      - name: Run test & make PDF
+      - name: Run test and generate PDF
         run: |
           npx mocha test --reporter mochawesome --reporter-options reportDir=report,reportFilename=index
-          node -e "require('html-pdf').create(require('fs').readFileSync('report/index.html', 'utf8')).toFile('report/report.pdf', err => { if(err) throw err; });"
+          node -e "const fs = require('fs'); const puppeteer = require('puppeteer'); (async () => {
+            const browser = await puppeteer.launch({ headless: 'new', args: ['--no-sandbox'] });
+            const page = await browser.newPage();
+            await page.setContent(fs.readFileSync('report/index.html', 'utf8'));
+            await page.pdf({ path: 'report/report.pdf', format: 'A4' });
+            await browser.close();
+          })();"
 
       - name: Upload PDF
         uses: actions/upload-artifact@main
