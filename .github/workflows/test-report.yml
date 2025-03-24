@@ -1,4 +1,4 @@
-name: PDF Test Report
+name: Simple PDF Report
 
 on:
   push:
@@ -8,36 +8,32 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout Code
-        uses: actions/checkout@v3
-
-      - name: Setup Node
-        uses: actions/setup-node@v3
+      - uses: actions/checkout@v3
+      - uses: actions/setup-node@v3
         with:
           node-version: '18'
 
-      - name: Install Dependencies
+      - name: Install deps
         run: |
-          npm install mocha mochawesome html-pdf-cli --save-dev
+          npm install mocha mochawesome html-pdf --save-dev
 
-      - name: Create Test File
+      - name: Create test
         run: |
           mkdir -p test
           echo "const assert = require('assert');
-          describe('PDF Test', () => {
+          describe('Test', () => {
             it('should pass', () => {
-              assert.strictEqual(1 + 1, 2);
+              assert.strictEqual(2 + 2, 4);
             });
           });" > test/test.js
 
-      - name: Run Test and Generate PDF
+      - name: Run test & make PDF
         run: |
           npx mocha test --reporter mochawesome --reporter-options reportDir=report,reportFilename=index
-          npx html-pdf-cli report/index.html report/report.pdf
-          ls -l report/
+          node -e "require('html-pdf').create(require('fs').readFileSync('report/index.html', 'utf8')).toFile('report/report.pdf', err => { if(err) throw err; });"
 
-      - name: Upload PDF Report
-        uses: actions/upload-artifact@main
+      - name: Upload PDF
+        uses: actions/upload-artifact@v3
         with:
           name: test-report
           path: report/report.pdf
